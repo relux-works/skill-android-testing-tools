@@ -8,12 +8,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 android-ui-testing-tools/
 ├── agents/skills/           # AI skill
 ├── Scripts/                 # Shell scripts
-├── toolkit/                 # Gradle multi-module project
+├── toolkit/                 # Gradle multi-module project (libraries)
 │   ├── screenshot-kit/      # Android Library
 │   ├── uitest-kit/          # Android Library
 │   ├── extract-screenshots/ # JVM CLI
-│   ├── demo-app/            # Demo application
 │   └── snapshotsdiff/       # Swift CLI
+├── demo-app/                # Demo app (separate Gradle project)
+│   └── settings.gradle.kts  # Toggle: useLocalLibs = true/false
+├── buildSrc/                # Convention plugins (shared)
+├── build.gradle.kts         # Root (for sourceControl consumers)
+├── settings.gradle.kts      # Root (for sourceControl consumers)
 ├── CLAUDE.md
 └── README.md
 ```
@@ -143,13 +147,71 @@ Contents:
 
 **Snapshot testing**: Use Paparazzi/Shot for automated comparison. Use `snapshotsdiff` CLI to analyze failures.
 
-## Dependencies
+## Publishing
+
+Two distribution methods: **sourceControl** (recommended) and **GitHub Packages**.
+
+**Release workflow:**
+1. Update version in `build.gradle.kts` (root) and `toolkit/build.gradle.kts`
+2. Commit and push
+3. Create git tag: `git tag 0.0.1 && git push origin 0.0.1`
+4. (Optional) Create GitHub Release to trigger GitHub Packages publish
+
+**Version must match git tag** for sourceControl to work.
+
+## Consuming Libraries
+
+### Option A: Gradle sourceControl (Recommended)
+
+No tokens needed. Gradle clones repo and builds from git tag.
 
 ```kotlin
-// In your app's androidTest dependencies
-androidTestImplementation("com.uitesttools:screenshot-kit:1.0.0")
-androidTestImplementation("com.uitesttools:uitest-kit:1.0.0")
+// settings.gradle.kts
+sourceControl {
+    gitRepository(uri("https://github.com/ivalx1s/android-ui-testing-tools.git")) {
+        producesModule("com.uitesttools:screenshot-kit")
+        producesModule("com.uitesttools:uitest-kit")
+    }
+}
+
+// build.gradle.kts
+dependencies {
+    androidTestImplementation("com.uitesttools:screenshot-kit:0.0.1")
+    androidTestImplementation("com.uitesttools:uitest-kit:0.0.1")
+}
 ```
+
+### Option B: GitHub Packages
+
+Requires authentication token.
+
+```kotlin
+// settings.gradle.kts
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.github.com/ivalx1s/android-ui-testing-tools")
+            credentials {
+                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+                password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+```
+
+Add to `~/.gradle/gradle.properties`:
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.key=YOUR_GITHUB_TOKEN  # needs read:packages scope
+```
+
+## Publishing Configuration
+
+- `build.gradle.kts` (root) - group/version for sourceControl
+- `toolkit/build.gradle.kts` - group/version for local dev
+- `toolkit/buildSrc/.../publish-android-library.gradle.kts` - GitHub Packages plugin
+- `.github/workflows/publish.yml` - CI workflow for GitHub Packages
 
 ## Gradle Version Catalog
 

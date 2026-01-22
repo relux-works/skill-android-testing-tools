@@ -16,11 +16,25 @@ A comprehensive toolkit for Android UI testing with screenshot capture, Page Obj
 
 ### 1. Add Dependencies
 
+#### Option A: Gradle sourceControl (Recommended)
+
+No registry needed — Gradle clones and builds from git tag directly (like SPM).
+
+```kotlin
+// settings.gradle.kts
+sourceControl {
+    gitRepository(uri("https://github.com/ivalx1s/android-ui-testing-tools.git")) {
+        producesModule("com.uitesttools:screenshot-kit")
+        producesModule("com.uitesttools:uitest-kit")
+    }
+}
+```
+
 ```kotlin
 // build.gradle.kts (app module)
 dependencies {
-    androidTestImplementation("com.uitesttools:screenshot-kit:1.0.0")
-    androidTestImplementation("com.uitesttools:uitest-kit:1.0.0")
+    androidTestImplementation("com.uitesttools:screenshot-kit:0.0.1")
+    androidTestImplementation("com.uitesttools:uitest-kit:0.0.1")
 
     // Standard test dependencies
     androidTestImplementation("androidx.test:runner:1.5.2")
@@ -28,6 +42,40 @@ dependencies {
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 }
 ```
+
+#### Option B: GitHub Packages
+
+```kotlin
+// settings.gradle.kts
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/ivalx1s/android-ui-testing-tools")
+            credentials {
+                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
+                password = providers.gradleProperty("gpr.key").orNull ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+```
+
+```kotlin
+// build.gradle.kts (app module)
+dependencies {
+    androidTestImplementation("com.uitesttools:screenshot-kit:0.0.1")
+    androidTestImplementation("com.uitesttools:uitest-kit:0.0.1")
+}
+```
+
+> **Note**: GitHub Packages requires authentication even for public packages. Add to `~/.gradle/gradle.properties`:
+> ```properties
+> gpr.user=YOUR_GITHUB_USERNAME
+> gpr.key=YOUR_GITHUB_TOKEN
+> ```
+> Token needs `read:packages` scope. Create at https://github.com/settings/tokens
 
 ### 2. Create Test Tags
 
@@ -162,13 +210,17 @@ android-ui-testing-tools/
 ├── agents/skills/           # AI agent skill
 │   └── android-ui-validation/
 ├── Scripts/                 # Shell scripts
-├── toolkit/                 # Gradle multi-module project
+├── toolkit/                 # Gradle multi-module project (libraries)
 │   ├── screenshot-kit/      # Screenshot capture library
 │   ├── uitest-kit/          # Page Objects, extensions, Allure
 │   ├── extract-screenshots/ # JVM CLI for screenshot extraction
-│   ├── demo-app/            # Demo application
 │   ├── snapshotsdiff/       # Swift CLI for visual diffs (macOS)
 │   └── gradle/libs.versions.toml
+├── demo-app/                # Demo app (separate Gradle project)
+│   └── settings.gradle.kts  # Toggle: useLocalLibs = true/false
+├── buildSrc/                # Convention plugins
+├── build.gradle.kts         # Root config (for sourceControl)
+├── settings.gradle.kts      # Root config (for sourceControl)
 ├── .claude/skills -> ../agents/skills
 ├── .codex/skills -> ../agents/skills
 ├── CLAUDE.md
