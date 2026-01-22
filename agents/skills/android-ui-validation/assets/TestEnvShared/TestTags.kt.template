@@ -1,0 +1,75 @@
+package {{PACKAGE_NAME}}.testenv
+
+/**
+ * Shared test tag constants for UI testing.
+ *
+ * These constants are shared between the app and test targets
+ * to ensure consistency and compile-time verification.
+ *
+ * Naming pattern: {Module}_{Screen}_{Element}_{Type}
+ */
+object TestTags {
+
+    // ===== Auth Module =====
+    object Auth {
+        object Login {
+            const val SCREEN = "Auth_Login_screen"
+            const val TITLE = "Auth_Login_Title_text"
+            const val USERNAME_INPUT = "Auth_Login_Username_input"
+            const val PASSWORD_INPUT = "Auth_Login_Password_input"
+            const val SUBMIT_BUTTON = "Auth_Login_Submit_button"
+            const val FORGOT_PASSWORD_LINK = "Auth_Login_ForgotPassword_link"
+            const val ERROR_MESSAGE = "Auth_Login_Error_text"
+            const val LOADING_INDICATOR = "Auth_Login_Loading_indicator"
+        }
+
+        object Register {
+            const val SCREEN = "Auth_Register_screen"
+            const val EMAIL_INPUT = "Auth_Register_Email_input"
+            const val PASSWORD_INPUT = "Auth_Register_Password_input"
+            const val CONFIRM_PASSWORD_INPUT = "Auth_Register_ConfirmPassword_input"
+            const val TERMS_CHECKBOX = "Auth_Register_Terms_checkbox"
+            const val SUBMIT_BUTTON = "Auth_Register_Submit_button"
+        }
+    }
+
+    // ===== Home Module =====
+    object Home {
+        object Feed {
+            const val SCREEN = "Home_Feed_screen"
+            const val POST_LIST = "Home_Feed_PostList_list"
+            const val POST_CARD = "Home_Feed_Post_card"
+            const val NEW_POST_BUTTON = "Home_Feed_NewPost_button"
+            const val SEARCH_INPUT = "Home_Feed_Search_input"
+            const val EMPTY_STATE = "Home_Feed_Empty_container"
+
+            fun postCard(index: Int) = "Home_Feed_Post_${index}_card"
+            fun postCard(id: String) = "Home_Feed_Post_${id}_card"
+        }
+    }
+
+    // ===== Settings Module =====
+    object Settings {
+        object Main {
+            const val SCREEN = "Settings_Main_screen"
+            const val PROFILE_BUTTON = "Settings_Main_Profile_button"
+            const val NOTIFICATIONS_BUTTON = "Settings_Main_Notifications_button"
+            const val LOGOUT_BUTTON = "Settings_Main_Logout_button"
+        }
+
+        object Profile {
+            const val SCREEN = "Settings_Profile_screen"
+            const val AVATAR_IMAGE = "Settings_Profile_Avatar_image"
+            const val NAME_INPUT = "Settings_Profile_Name_input"
+            const val SAVE_BUTTON = "Settings_Profile_Save_button"
+        }
+    }
+
+    // ===== Common Components =====
+    object Common {
+        const val LOADING_INDICATOR = "Common_Loading_indicator"
+        const val ERROR_DIALOG = "Common_Error_dialog"
+        const val CONFIRM_DIALOG = "Common_Confirm_dialog"
+        const val BACK_BUTTON = "Common_Back_button"
+    }
+}

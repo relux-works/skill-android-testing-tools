@@ -1,0 +1,32 @@
+package {{PACKAGE_NAME}}.tests.pages
+
+import androidx.test.uiautomator.UiDevice
+import com.uitesttools.uitest.pageobject.PageElement
+
+/**
+ * Base page with common functionality for all pages.
+ */
+abstract class BasePage(override val device: UiDevice) : PageElement {
+
+    override val defaultTimeout: Long = 5000L
+
+    /**
+     * Navigate back using device back button.
+     */
+    fun navigateBack() {
+        device.pressBack()
+    }
+
+    /**
+     * Wait for loading to complete.
+     */
+    fun waitForLoadingToComplete(timeout: Long = defaultTimeout) {
+        // Wait for loading indicator to disappear
+        device.wait(
+            androidx.test.uiautomator.Until.gone(
+                androidx.test.uiautomator.By.res("Common_Loading_indicator")
+            ),
+            timeout
+        )
+    }
+}

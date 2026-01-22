@@ -1,0 +1,49 @@
+package {{PACKAGE_NAME}}.tests
+
+import com.uitesttools.uitest.pageobject.BaseUiTestSuite
+import org.junit.Before
+
+/**
+ * Base class for all UI tests in this project.
+ *
+ * Provides:
+ * - Common setup/teardown
+ * - Screenshot management
+ * - Page object helpers
+ */
+abstract class BaseUiTest : BaseUiTestSuite() {
+
+    override val packageName = "{{PACKAGE_NAME}}"
+
+    /**
+     * Test user credentials for login tests.
+     */
+    protected object TestUsers {
+        const val VALID_EMAIL = "test@example.com"
+        const val VALID_PASSWORD = "testpassword123"
+        const val INVALID_EMAIL = "invalid@example.com"
+        const val INVALID_PASSWORD = "wrongpassword"
+    }
+
+    @Before
+    override fun setUp() {
+        super.setUp()
+        // Additional setup if needed
+    }
+
+    /**
+     * Launch app and navigate to login screen.
+     */
+    protected fun launchToLogin(): LoginPage {
+        launchApp()
+        return LoginPage(device).waitForReady()
+    }
+
+    /**
+     * Launch app and login with default test user.
+     */
+    protected fun launchAndLogin(): HomePage {
+        return launchToLogin()
+            .login(TestUsers.VALID_EMAIL, TestUsers.VALID_PASSWORD)
+    }
+}

@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Local configuration
+local.properties
+
+# Temp and logs
+.temp/
+*.log
+
+# Kotlin
+*.class
+
+# Swift build artifacts
+.build/
+.swiftpm/
+
+# Screenshots output
+screenshots/
+SnapshotDiffs/
+SnapshotArtifacts/

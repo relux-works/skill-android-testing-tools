@@ -1,0 +1,110 @@
+package {{PACKAGE_NAME}}.tests.pages
+
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiObject2
+import {{PACKAGE_NAME}}.testenv.TestTags
+
+/**
+ * Page object for the Home/Feed screen.
+ */
+class HomePage(device: UiDevice) : BasePage(device) {
+
+    override val readyMarker = TestTags.Home.Feed.SCREEN
+
+    // ----- Elements -----
+
+    val feedList: UiObject2?
+        get() = device.findObject(By.res(TestTags.Home.Feed.POST_LIST))
+
+    val newPostButton: UiObject2?
+        get() = device.findObject(By.res(TestTags.Home.Feed.NEW_POST_BUTTON))
+
+    val searchInput: UiObject2?
+        get() = device.findObject(By.res(TestTags.Home.Feed.SEARCH_INPUT))
+
+    val emptyState: UiObject2?
+        get() = device.findObject(By.res(TestTags.Home.Feed.EMPTY_STATE))
+
+    // ----- Actions -----
+
+    /**
+     * Get all post cards in the feed.
+     */
+    fun getPostCards(): List<UiObject2> {
+        return device.findObjects(By.res(TestTags.Home.Feed.POST_CARD))
+    }
+
+    /**
+     * Get post card at specific index.
+     */
+    fun getPostAt(index: Int): UiObject2? {
+        return getPostCards().getOrNull(index)
+    }
+
+    /**
+     * Tap on a post to view details.
+     */
+    fun tapPostAt(index: Int): PostDetailPage {
+        getPostAt(index)?.click()
+        return PostDetailPage(device).waitForReady()
+    }
+
+    /**
+     * Tap new post button.
+     */
+    fun tapNewPost(): NewPostPage {
+        newPostButton?.click()
+        return NewPostPage(device).waitForReady()
+    }
+
+    /**
+     * Search for content.
+     */
+    fun search(query: String): HomePage {
+        searchInput?.text = query
+        return this
+    }
+
+    /**
+     * Scroll down to load more posts.
+     */
+    fun scrollDown(): HomePage {
+        device.swipe(
+            device.displayWidth / 2,
+            device.displayHeight * 3 / 4,
+            device.displayWidth / 2,
+            device.displayHeight / 4,
+            20
+        )
+        device.waitForIdle(500)
+        return this
+    }
+
+    // ----- Assertions -----
+
+    /**
+     * Assert feed is empty.
+     */
+    fun assertFeedEmpty(): HomePage {
+        require(emptyState != null) { "Expected empty state but found posts" }
+        return this
+    }
+
+    /**
+     * Assert feed has posts.
+     */
+    fun assertHasPosts(): HomePage {
+        require(getPostCards().isNotEmpty()) { "Expected posts but feed is empty" }
+        return this
+    }
+
+    /**
+     * Assert specific number of posts visible.
+     */
+    fun assertPostCount(count: Int): HomePage {
+        val actual = getPostCards().size
+        require(actual == count) { "Expected $count posts but found $actual" }
+        return this
+    }
+}
