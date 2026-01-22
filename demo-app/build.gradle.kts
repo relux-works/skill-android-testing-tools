@@ -1,7 +1,7 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose.compiler)
+    id("com.android.application") version "8.13.2"
+    id("org.jetbrains.kotlin.android") version "2.0.21"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.21"
 }
 
 android {
@@ -47,15 +47,15 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose:1.9.3")
 
-    // Our libraries
-    androidTestImplementation(project(":screenshot-kit"))
-    androidTestImplementation(project(":uitest-kit"))
+    // Our libraries (resolved via includeBuild or sourceControl in settings.gradle.kts)
+    androidTestImplementation("com.uitesttools:screenshot-kit:0.0.1")
+    androidTestImplementation("com.uitesttools:uitest-kit:0.0.1")
 
     // Test dependencies
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.uiautomator)
-    androidTestImplementation(libs.junit)
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test:rules:1.5.0")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
+    androidTestImplementation("junit:junit:4.13.2")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

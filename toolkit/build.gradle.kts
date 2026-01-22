@@ -11,7 +11,7 @@ plugins {
 
 allprojects {
     group = "com.uitesttools"
-    version = "1.0.0"
+    version = "0.0.1"
 }
 
 tasks.register("clean", Delete::class) {

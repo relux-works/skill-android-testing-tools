@@ -23,4 +23,4 @@ rootProject.name = "android-ui-testing-tools"
 include(":screenshot-kit")
 include(":uitest-kit")
 include(":extract-screenshots")
-include(":demo-app")
+// demo-app moved to separate project at ../demo-app
