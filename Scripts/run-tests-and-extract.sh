@@ -5,6 +5,16 @@
 # Usage:
 #   ./run-tests-and-extract.sh [OPTIONS]
 #
+# Note:
+#   This wrapper uses connectedAndroidTest. That is fine for emulator/CI lanes,
+#   but on some physical devices (especially MIUI/Xiaomi) the Gradle-managed
+#   install phase can fail intermittently with INSTALL_FAILED_USER_RESTRICTED.
+#   For those devices, prefer:
+#     1. ./gradlew :app:assembleDebug :app:assembleAndroidTest
+#     2. adb install -r -t app-debug.apk + app-debug-androidTest.apk
+#     3. adb shell am instrument -w ...
+#     4. ./Scripts/extract-screenshots.sh ...
+#
 # Options:
 #   -module <name>     Gradle module containing tests (default: app)
 #   -testClass <name>  Specific test class to run (optional)
@@ -66,6 +76,9 @@ while [[ $# -gt 0 ]]; do
             echo "  ./run-tests-and-extract.sh"
             echo "  ./run-tests-and-extract.sh -module app -testClass LoginTest"
             echo "  ./run-tests-and-extract.sh -serial emulator-5554 -output ./screenshots"
+            echo
+            echo "Physical device note:"
+            echo "  On MIUI/Xiaomi, prefer preinstall + 'adb shell am instrument' over connectedAndroidTest."
             exit 0
             ;;
         *)

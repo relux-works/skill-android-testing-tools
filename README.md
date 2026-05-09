@@ -168,6 +168,52 @@ cd toolkit
 ./Scripts/run-tests-and-extract.sh -module app -output ./screenshots
 ```
 
+## Real Device Execution
+
+For physical Android devices, especially MIUI/Xiaomi, the most reliable lane is:
+
+1. build the app APK and the androidTest APK
+2. install both with `adb install -r -t`
+3. run instrumentation directly with `adb shell am instrument`
+4. pull screenshots after the run
+
+Why:
+
+- `connectedDebugAndroidTest` / `connectedAndroidTest` often re-enters Gradle-managed install flow
+- on MIUI this can fail intermittently with `INSTALL_FAILED_USER_RESTRICTED`
+- once APKs are already installed, direct `am instrument` is much more stable
+
+Example:
+
+```bash
+./gradlew :app:assembleDebug :app:assembleAndroidTest
+
+adb -s 535a1632 install -r -t app/build/outputs/apk/debug/app-debug.apk
+adb -s 535a1632 install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+
+adb -s 535a1632 shell am instrument -w \
+  -e class com.example.app.LoginTest \
+  com.example.app.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+If you also want screenshots copied locally after the run:
+
+```bash
+./Scripts/extract-screenshots.sh ./screenshots --serial 535a1632
+```
+
+Recommended split:
+
+- emulator / CI lane: `connectedAndroidTest`
+- physical-device lane: preinstall + `am instrument`
+
+Practical advice for UI tests on physical devices:
+
+- prefer explicit launch and ready-state waits over assuming the app is foregrounded
+- for `UiAutomator`, use text / content-description / resource-id fallbacks instead of relying on a single locator type
+- if you use Compose test tags with `UiAutomator`, expose them through `semantics { testTagsAsResourceId = true }` on the root container
+- keep screenshot extraction decoupled from test execution so a failed run still leaves artifacts behind
+
 ## CLI Tools
 
 ### extract-screenshots
