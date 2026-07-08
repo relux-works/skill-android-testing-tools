@@ -18,7 +18,7 @@ A comprehensive toolkit for Android UI testing with screenshot capture, Page Obj
 
 #### Option A: Gradle sourceControl (Recommended)
 
-No registry needed — Gradle clones and builds from git tag directly (like SPM).
+No registry needed: Gradle clones and builds from git tag directly (like SPM).
 
 ```kotlin
 // settings.gradle.kts
@@ -296,7 +296,7 @@ The skill provides:
 
 ### buildSrc duplication
 
-`buildSrc/` exists in both root and `toolkit/` directories. This is intentional — Android Studio fails to sync projects when `toolkit/buildSrc` is a symlink to `../buildSrc`.
+`buildSrc/` exists in both root and `toolkit/` directories. This is intentional; Android Studio fails to sync projects when `toolkit/buildSrc` is a symlink to `../buildSrc`.
 
 ```
 buildSrc/                      # For sourceControl consumers (root build)
