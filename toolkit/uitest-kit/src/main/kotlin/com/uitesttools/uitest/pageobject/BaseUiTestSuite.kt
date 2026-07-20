@@ -114,6 +114,36 @@ abstract class BaseUiTestSuite {
      * @param clearState Whether to clear app data before launch
      */
     protected fun launchApp(clearState: Boolean = false) {
+        launchApp(clearState) { /* no extras */ }
+    }
+
+    /**
+     * Launch the app under test with **test-directed IoC extras** on the launch
+     * intent — the Android way to flip the app's DI graph from a test.
+     *
+     * Instrumentation `-e KEY VALUE` args do NOT reach the app process, so a
+     * flag cannot be read via `ProcessInfo`-style access the way iOS does it.
+     * Instead the test puts the flags as **intent extras** here; the app's entry
+     * point reads them (`intent.testArgsReader()`) and swaps bindings. Use the
+     * shared `TestArgs` keys (never raw strings) and
+     * `com.uitesttools.uitest.testargs.putTestArgs`:
+     *
+     * ```kotlin
+     * launchApp {
+     *     putTestArgs(
+     *         booleans = mapOf(TestArgs.MOCK_NETWORK to true),
+     *         strings  = mapOf(TestArgs.START_SCREEN to "Login"),
+     *     )
+     * }
+     * ```
+     *
+     * @param clearState Whether to clear app data before launch.
+     * @param configureIntent Applied to the launch intent to add extras.
+     */
+    protected fun launchApp(
+        clearState: Boolean = false,
+        configureIntent: Intent.() -> Unit,
+    ) {
         if (clearState) {
             clearAppData()
         }
@@ -131,6 +161,7 @@ abstract class BaseUiTestSuite {
             ?.apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                configureIntent()
             }
 
         requireNotNull(intent) {

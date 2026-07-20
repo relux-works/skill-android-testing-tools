@@ -60,4 +60,7 @@ dependencies {
 
     // Optional Compose support
     compileOnly(libs.compose.ui.test)
+
+    // Local JVM unit tests (e.g. E2E marker format contract)
+    testImplementation(libs.junit)
 }
