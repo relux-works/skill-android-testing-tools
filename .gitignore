@@ -28,3 +28,11 @@ local.properties
 screenshots/
 SnapshotDiffs/
 SnapshotArtifacts/
+
+# Agent working state (task-board / research / logs / board config)
+.task-board/
+.research/
+.planning/
+LOGBOOK.md
+task-board.config.json
+.agents/

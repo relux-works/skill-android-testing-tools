@@ -1,5 +1,11 @@
 # Shared Test Identifiers
 
+> **Recommended path:** use the dedicated `shared-test-identifiers` Gradle module —
+> see [shared-test-identifiers.md](shared-test-identifiers.md) for the authoritative
+> wiring guide (TestTags + TestArgs + TestConsts, consumed by both the app and the
+> `androidTest` source set). This document covers the single-source-set fallback and
+> the `TestTags` shape in detail.
+
 ## Overview
 
 Sharing test tag constants between app and test targets ensures:

@@ -166,11 +166,26 @@ cd toolkit
 
 # Or use combined script
 ./Scripts/run-tests-and-extract.sh -module app -output ./screenshots
+
+# Target a specific device (multi-device machines)
+./Scripts/run-tests-and-extract.sh --serial emulator-5554
 ```
 
 ## Real Device Execution
 
-For physical Android devices, especially MIUI/Xiaomi, the most reliable lane is:
+For physical Android devices, especially MIUI/Xiaomi, the most reliable lane is
+now a first-class flag on the combined script:
+
+```bash
+# Assembles APKs -> adb install -r -t -> adb shell am instrument -w -> extract
+./Scripts/run-tests-and-extract.sh --manual-install --serial 535a1632
+
+# Pass the instrumentation component if it can't be auto-discovered
+./Scripts/run-tests-and-extract.sh --manual-install --serial 535a1632 \
+  --test-runner com.example.app.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Under the hood this performs the same reliable steps you can also run by hand:
 
 1. build the app APK and the androidTest APK
 2. install both with `adb install -r -t`
@@ -196,6 +211,18 @@ adb -s 535a1632 shell am instrument -w \
   com.example.app.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
+Or use the first-class script for this whole lane (build → install → instrument),
+which also turns the MIUI `INSTALL_FAILED_USER_RESTRICTED` failure into an
+actionable, documented error (exit code `3`):
+
+```bash
+# From your Android project root
+./Scripts/android-device-build.sh -serial 535a1632 -testClass com.example.LoginTest
+
+# Re-run against already-installed APKs (fast, avoids the MIUI install restriction)
+./Scripts/android-device-build.sh --no-install -serial 535a1632
+```
+
 If you also want screenshots copied locally after the run:
 
 ```bash
@@ -204,8 +231,13 @@ If you also want screenshots copied locally after the run:
 
 Recommended split:
 
-- emulator / CI lane: `connectedAndroidTest`
-- physical-device lane: preinstall + `am instrument`
+- emulator / CI lane: `connectedAndroidTest` (default lane)
+- physical-device lane: `--manual-install` (preinstall + `am instrument`)
+
+After any run, **visually verify every extracted screenshot** (orientation,
+black screens, layout, all elements present) — a green test is not proof the UI
+rendered correctly. See the `android-testing-tools` SKILL "Screenshot
+Verification Gate".
 
 Practical advice for UI tests on physical devices:
 
@@ -213,6 +245,18 @@ Practical advice for UI tests on physical devices:
 - for `UiAutomator`, use text / content-description / resource-id fallbacks instead of relying on a single locator type
 - if you use Compose test tags with `UiAutomator`, expose them through `semantics { testTagsAsResourceId = true }` on the root container
 - keep screenshot extraction decoupled from test execution so a failed run still leaves artifacts behind
+
+When a run fails or an E2E marker sequence stalls, triage the device log:
+
+```bash
+./Scripts/logcat-triage.sh clear  -s 535a1632                       # before the run
+./Scripts/logcat-triage.sh crash  -s 535a1632                       # crash / ANR lines
+./Scripts/logcat-triage.sh markers -s 535a1632                      # APP_E2E_MARKER sequence
+./Scripts/logcat-triage.sh triage -s 535a1632 -p com.example.app \
+  -o .temp/run-fail                                                 # full bundle to attach
+```
+
+See `references/logcat-triage.md` for the full command reference.
 
 ## CLI Tools
 
@@ -230,6 +274,25 @@ java -jar toolkit/extract-screenshots/build/libs/extract-screenshots.jar ./scree
     --clean \
     --device-path /sdcard/Pictures/Screenshots/UITests
 ```
+
+### check-raw-tags (no-raw-tag lint)
+
+Flags string literals passed to a tag lookup API instead of a shared `TestTags` /
+`UITest.Identifier` constant — the Android analog of iOS's "no raw launch-arg
+strings" rule. Covers all three engines (`testTag`/`onNodeWithTag`, `By.res`/
+`By.desc`, `withContentDescription`/`waitForResourceId`); identifier definition
+files are exempt. Exits non-zero on any hit, so it drops straight into CI.
+
+```bash
+# scan a source tree (exit 1 if a raw tag literal is found)
+agents/skills/android-testing-tools/scripts/check-raw-tags.sh app/src
+
+# self-test (no Android SDK/device needed)
+agents/skills/android-testing-tools/scripts/check-raw-tags.test.sh
+```
+
+See `agents/skills/android-testing-tools/references/testtag-engine-matrix.md` for
+the full 3-engine lookup matrix and the `testTagsAsResourceId` gotcha.
 
 ### snapshotsdiff (macOS only)
 
@@ -249,12 +312,29 @@ swift build -c release --package-path toolkit/snapshotsdiff
     --tests ./AppSnapshotTests
 ```
 
+### logcat-triage
+
+Triage device logs for a failed instrumented or two-device E2E run — clear the
+buffer before a run, follow app-scoped logcat, grep crash/ANR, follow the
+`APP_E2E_MARKER` sequence, or capture a full bundle to disk:
+
+```bash
+./Scripts/logcat-triage.sh clear  --serial 535a1632
+./Scripts/logcat-triage.sh watch  --serial 535a1632 --pkg com.example.app
+./Scripts/logcat-triage.sh crash  --serial 535a1632
+./Scripts/logcat-triage.sh markers --serial 535a1632
+./Scripts/logcat-triage.sh triage --serial 535a1632 --pkg com.example.app --out .temp/run-fail
+```
+
+Full command reference:
+[references/logcat-triage.md](agents/skills/android-testing-tools/references/logcat-triage.md).
+
 ## Project Structure
 
 ```
 android-ui-testing-tools/
 ├── agents/skills/           # AI agent skill
-│   └── android-ui-validation/
+│   └── android-testing-tools/
 ├── Scripts/                 # Shell scripts
 ├── toolkit/                 # Gradle multi-module project (libraries)
 │   ├── screenshot-kit/      # Screenshot capture library
@@ -333,8 +413,8 @@ swift build -c release --package-path toolkit/snapshotsdiff
 ## Documentation
 
 - [CLAUDE.md](CLAUDE.md) - AI assistant guidance
-- [agents/skills/android-ui-validation/SKILL.md](agents/skills/android-ui-validation/SKILL.md) - Full skill documentation
-- [agents/skills/android-ui-validation/references/](agents/skills/android-ui-validation/references/) - Detailed guides
+- [agents/skills/android-testing-tools/SKILL.md](agents/skills/android-testing-tools/SKILL.md) - Full skill documentation
+- [agents/skills/android-testing-tools/references/](agents/skills/android-testing-tools/references/) - Detailed guides
 
 ## Related Projects
 
@@ -359,4 +439,4 @@ work is open source.
 
 ## License
 
-MIT
+Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).

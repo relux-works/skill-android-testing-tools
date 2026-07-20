@@ -69,6 +69,9 @@ cd /path/to/your/project
 # Extract screenshots from device
 ./Scripts/extract-screenshots.sh ./screenshots --serial emulator-5554
 
+# Triage device logs after a failed instrumented / E2E run
+./Scripts/logcat-triage.sh triage --serial emulator-5554 --pkg com.example.app
+
 # Install AI skill to a project
 ./Scripts/setup-project-skills.sh /path/to/your/project
 
@@ -118,7 +121,7 @@ cd /path/to/your/project
 Skill for AI-assisted UI test development (Claude Code + Codex CLI):
 
 ```
-agents/skills/android-ui-validation/  <- actual skill
+agents/skills/android-testing-tools/  <- actual skill
 .claude/skills -> ../agents/skills    <- symlink
 .codex/skills -> ../agents/skills     <- symlink
 ```
@@ -145,7 +148,7 @@ Contents:
 
 **Screenshot output**: Extracted to `{output-dir}/Run_*/Test_*/Step_*.png`
 
-**Snapshot testing**: Use Paparazzi/Shot for automated comparison. Use `snapshotsdiff` CLI to analyze failures.
+**Snapshot testing**: **Paparazzi** (JVM, no device) is the deterministic golden-file layer — `./gradlew recordPaparazziDebug` / `verifyPaparazziDebug` (wired in `demo-app/`). Shot is a secondary on-device alternative. `snapshotsdiff` is demoted to **ad-hoc single-image** diffs on Android (`snapshotsdiff golden.png actual.png diff.png`); its `--artifacts/--tests` batch mode is iOS-shaped and not used here. See the `android-testing-tools` skill → `references/snapshot-testing.md`.
 
 ## Publishing
 

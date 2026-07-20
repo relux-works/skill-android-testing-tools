@@ -131,6 +131,11 @@ With string resources:
 
 ## Finding Elements in Tests
 
+> The same BEM tag is queried through three engines (Compose UI Test / Espresso /
+> UIAutomator). For the authoritative apply-vs-query matrix, the
+> `testTagsAsResourceId` gotcha, and the no-raw-tag lint, see
+> @references/testtag-engine-matrix.md.
+
 ### UIAutomator
 
 ```kotlin

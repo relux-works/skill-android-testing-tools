@@ -1,0 +1,37 @@
+package {{PACKAGE_NAME}}.tests.pages
+
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.uitesttools.uitest.pageobject.ComposePageManager
+
+/**
+ * In-process Compose aggregator — the SECOND PageManager mode.
+ *
+ * Use this only for genuinely in-process Compose tests (`createComposeRule()` /
+ * `createAndroidComposeRule<MainActivity>()`), where `onNodeWithTag` is faster
+ * and more precise than UIAutomator's `By.res` and no app launch is needed. The
+ * default cross-process aggregator is `AppPages : PageManager`.
+ *
+ * Compose pages here query through the [ComposeTestRule] (`onNodeWithTag`), which
+ * does NOT need `testTagsAsResourceId = true` (that flag is only for the
+ * UIAutomator `By.res` path).
+ *
+ * ```kotlin
+ * class MainComposeTest {
+ *     @get:Rule val composeRule = createAndroidComposeRule<MainActivity>()
+ *     private val pm by lazy { AppComposePages(composeRule) }
+ *
+ *     @Test fun increments() {
+ *         pm.screenshot(1, "launched")
+ *         pm.mainPage.tapIncrement().assertCounter(1)
+ *         pm.screenshot(2, "incremented")
+ *     }
+ * }
+ * ```
+ */
+class AppComposePages(
+    composeRule: ComposeTestRule,
+) : ComposePageManager(composeRule) {
+
+    // Compose page objects that take the ComposeTestRule, e.g.:
+    // val mainPage: MainComposePage by lazy { MainComposePage(composeRule) }
+}

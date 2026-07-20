@@ -1,0 +1,58 @@
+package {{PACKAGE_NAME}}.tests.pages
+
+import android.content.Intent
+import androidx.test.uiautomator.UiDevice
+import com.uitesttools.uitest.pageobject.Orientation
+import com.uitesttools.uitest.pageobject.PageManager
+
+/**
+ * App Page Manager / Pages aggregator — the single entry point every UI test
+ * talks to.
+ *
+ * Subclasses the reusable [PageManager] (UIAutomator, cross-process default:
+ * one manager drives an emulator and a physical device identically). It:
+ *  - forces [orientation] BEFORE launch (so screenshots are never rotated),
+ *  - launches the app in the constructor (pass `autoLaunch = false` to defer),
+ *  - exposes every Page Object as a lazy accessor so a test reads
+ *    `pm.loginPage.login(...)` and never touches `UiDevice` / `By` directly,
+ *  - offers a `screenshot(step, desc)` passthrough so tests only talk to `pm`.
+ *
+ * Test-directed IoC (when a test must flip the app's DI graph) goes through
+ * [configureIntent] with the shared `TestArgs` keys and
+ * `com.uitesttools.uitest.testargs.putTestArgs` — intent extras, because
+ * instrumentation `-e KEY VALUE` args never reach the app process on Android.
+ *
+ * ```kotlin
+ * val pm = AppPages(device) {
+ *     putTestArgs(
+ *         booleans = mapOf(TestArgs.MOCK_NETWORK to true),
+ *         strings  = mapOf(TestArgs.START_SCREEN to "Login"),
+ *     )
+ * }
+ * pm.screenshot(1, "app_launched")
+ * val home = pm.loginPage.waitForReady().login(user, pass)
+ * pm.screenshot(2, "logged_in")
+ * ```
+ *
+ * For pure-Compose in-process tests, use `ComposePageManager` instead (drives a
+ * `ComposeTestRule`, no app launch) — a second mode, not this default.
+ */
+class AppPages(
+    device: UiDevice,
+    orientation: Orientation = Orientation.PORTRAIT,
+    autoLaunch: Boolean = true,
+    configureIntent: Intent.() -> Unit = {},
+) : PageManager(
+    device = device,
+    packageName = "{{PACKAGE_NAME}}",
+    orientation = orientation,
+    configureIntent = configureIntent,
+    autoLaunch = autoLaunch,
+) {
+
+    // ----- Page registry (lazy so a page is built only when first used) -----
+
+    val loginPage: LoginPage by lazy { LoginPage(device) }
+    val homePage: HomePage by lazy { HomePage(device) }
+    // Add every screen here: `val settingsPage by lazy { SettingsPage(device) }`
+}
