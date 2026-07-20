@@ -3,7 +3,7 @@ package com.uitesttools.demo.pages
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
-import com.uitesttools.demo.TestTags
+import com.uitesttools.demo.testids.TestTags
 import com.uitesttools.uitest.pageobject.PageElement
 
 /**

@@ -9,10 +9,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.uitesttools.demo.testids.TestTags
 
 @Composable
-fun MainScreen() {
-    var counter by remember { mutableIntStateOf(0) }
+fun MainScreen(initialCounter: Int = 0) {
+    var counter by remember { mutableIntStateOf(initialCounter) }
 
     Column(
         modifier = Modifier

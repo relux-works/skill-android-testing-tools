@@ -20,6 +20,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "demo-app"
 
+// Shared test identifiers: single source of truth (TestTags / TestArgs / TestConsts),
+// consumed by both the app main source set and the androidTest source set.
+include(":shared-test-identifiers")
+
 // === Toggle: local vs remote ===
 val useLocalLibs = true  // true = local development, false = git sourceControl
 
