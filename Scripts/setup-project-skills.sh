@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# setup-project-skills.sh - Install android-ui-validation skill to a project
+# setup-project-skills.sh - Install android-testing-tools skill to a project
 #
 # Creates symlinks from project's .claude/skills and .codex/skills
 # to the skill in this toolkit.
@@ -12,7 +12,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TOOLKIT_DIR="$(dirname "$SCRIPT_DIR")"
-SKILL_NAME="android-ui-validation"
+SKILL_NAME="android-testing-tools"
 SKILL_SOURCE="${TOOLKIT_DIR}/agents/skills/${SKILL_NAME}"
 
 if [[ $# -lt 1 ]]; then
