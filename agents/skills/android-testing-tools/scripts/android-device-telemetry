@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOOL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../tools/android-device-telemetry" && pwd)"
+exec go run "$TOOL_DIR/main.go" "$@"
