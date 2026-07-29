@@ -13,6 +13,9 @@ description: |
   (8) Organizing shared test identifiers between app and test targets
   (9) Two-device physical E2E with adb marker synchronization
   (10) Test-directed IoC via instrumentation/intent-extra args
+  (11) Consuming standalone Android libraries directly from Git with Gradle sourceControl
+  (12) Structuring Android host applications with one-way MVI
+  (13) Choosing pragmatic Gradle module boundaries
   File types: Kotlin UI tests, Espresso, UIAutomator, Compose UI Test, Allure reports
 triggers:
   - android ui test
@@ -30,6 +33,10 @@ triggers:
   - physical device android test
   - instrumentation args
   - adb marker sync
+  - gradle sourceControl
+  - gradle source dependency
+  - android mvi
+  - android modularity
 ---
 
 # Android UI Testing Tools Skill
@@ -155,6 +162,11 @@ androidTestImplementation("androidx.test:runner:1.5.2")
 androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 ```
+
+For a standalone internal Android library consumed directly from Git, local
+composite substitution, secret-safe SSH access, one-way MVI defaults, and
+pragmatic Gradle module boundaries, read
+@references/self-hosted-gradle-mvi-modularity.md before wiring the host app.
 
 ## Screenshot Naming Convention
 
@@ -343,6 +355,62 @@ Only after this visual gate passes is the run trustworthy. If any screenshot
 fails the check, fix the cause and re-run — do not hand off a green-but-broken UI.
 
 ## Emulator & ADB Commands
+
+### Mandatory Physical-Device Stay-Awake Preflight
+
+Before every live physical-device UI, instrumentation, acoustic, or E2E run,
+configure each target once with the bundled helper:
+
+```bash
+<android-testing-tools-skill-root>/scripts/android-keep-awake.sh \
+    --serial <device-serial>
+```
+
+Run this immediately after resolving the device serial and before launching an
+activity, instrumentation, or host-driven UI automation. The default is 24
+hours. It enables stay-awake for AC, USB, and wireless power because
+MIUI/HyperOS may report a USB-connected device as AC-powered; it also sets the
+screen-off and lock-after timeouts to the same duration and wakes the display.
+It cannot bypass an already-secure lock screen, so unlock the device once
+before an unattended run.
+
+`Scripts/android-device-build.sh`, the manual-install lane in
+`Scripts/run-tests-and-extract.sh`, and both targets in
+`Scripts/android-e2e-runner.sh` apply this preflight automatically.
+
+### Physical-Device Thermal Telemetry
+
+Capture root-free device state before and after a physical performance run:
+
+```bash
+<android-testing-tools-skill-root>/scripts/android-device-telemetry snapshot \
+    --serial <device-serial> \
+    --output .temp/<TASK-ID>/thermal-before.jsonl
+```
+
+For a benchmark, start a bounded JSONL monitor beside the test process:
+
+```bash
+<android-testing-tools-skill-root>/scripts/android-device-telemetry monitor \
+    --serial <device-serial> \
+    --interval-seconds 5 \
+    --duration-seconds 180 \
+    --output .temp/<TASK-ID>/thermal-monitor.jsonl &
+telemetry_pid=$!
+
+# Run the physical benchmark here.
+
+wait "$telemetry_pid"
+```
+
+The stream records UTC time, device identity, battery temperature, Android
+thermal status, named thermal zones, cooling-device levels, and every exposed
+CPU frequency policy's current, capped maximum, and hardware maximum frequency.
+Treat `max_khz < hardware_max_khz` or a non-zero CPU cooling-device value as
+direct throttling evidence even when the coarse Android thermal status remains
+zero. Compare performance runs only at equivalent thermal/frequency states.
+The extensionless launcher delegates to a typed Go implementation and requires
+Go 1.21 or newer.
 
 ### Finding Android SDK Tools
 
@@ -597,6 +665,8 @@ All scripts live in `Scripts/` (run from your Android project root unless noted)
 
 | Script | Purpose | Section |
 |---|---|---|
+| `scripts/android-keep-awake.sh` (in skill) | Keep powered test devices awake and delay auto-lock for 24h | Emulator & ADB Commands |
+| `scripts/android-device-telemetry` (in skill) | Snapshot or monitor physical-device temperature, cooling, and CPU frequency caps as JSONL through the bundled Go implementation | Emulator & ADB Commands |
 | `check-tools.sh` | Java/Gradle/SDK/ADB/Swift preflight | — |
 | `run-tests-and-extract.sh` | Run instrumented tests + extract screenshots (`--serial`, `--manual-install`) | Extract Screenshots |
 | `extract-screenshots.sh` | ADB pull + Run/Test/Step organize | Extract Screenshots |
@@ -624,6 +694,7 @@ Regression above). `snapshotsdiff` is the macOS ad-hoc single-image diff CLI.
 - @references/physical-android-e2e-sync.md - Two-device physical E2E: adb marker sync, scoped-storage caveat, `Scripts/android-e2e-runner.sh`, iOS-vs-Android mechanics
 - @references/logcat-triage.md - Runtime log triage for instrumented / E2E runs (`Scripts/logcat-triage.sh`)
 - @references/snapshot-testing.md - Paparazzi snapshot regression: Gradle wiring, multi-config, CI, visual-review gate, snapshotsdiff re-scope
+- @references/self-hosted-gradle-mvi-modularity.md - Registry-free Git source dependencies, local composite substitution, secret-safe SSH, one-way MVI, and pragmatic module boundaries
 
 ## Assets
 

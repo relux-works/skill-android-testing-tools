@@ -185,6 +185,18 @@ now a first-class flag on the combined script:
   --test-runner com.example.app.test/androidx.test.runner.AndroidJUnitRunner
 ```
 
+Physical-device scripts automatically keep each powered target awake and delay
+screen-off/auto-lock for 24 hours. To apply the same preflight manually:
+
+```bash
+agents/skills/android-testing-tools/scripts/android-keep-awake.sh \
+  --serial 535a1632
+```
+
+The helper covers AC, USB, and wireless power because some MIUI/HyperOS devices
+report a USB cable as AC power. Unlock a secure lock screen once before leaving
+the run unattended.
+
 Under the hood this performs the same reliable steps you can also run by hand:
 
 1. build the app APK and the androidTest APK
@@ -259,6 +271,51 @@ When a run fails or an E2E marker sequence stalls, triage the device log:
 See `references/logcat-triage.md` for the full command reference.
 
 ## CLI Tools
+
+### android-keep-awake
+
+Prepare a powered physical device for unattended UI, instrumentation, acoustic,
+or E2E testing:
+
+```bash
+# Default: 24 hours
+agents/skills/android-testing-tools/scripts/android-keep-awake.sh \
+  --serial 535a1632
+
+# Optional override
+agents/skills/android-testing-tools/scripts/android-keep-awake.sh \
+  --serial 535a1632 \
+  --duration-hours 12
+```
+
+The command updates the device's stay-awake, screen-off, and lock-after
+settings, then wakes the display. It writes no local artifacts.
+
+### android-device-telemetry
+
+Capture a one-shot root-free thermal/frequency snapshot or a bounded JSONL
+time series around a physical benchmark:
+
+```bash
+# Before/after snapshot
+agents/skills/android-testing-tools/scripts/android-device-telemetry snapshot \
+  --serial 535a1632 \
+  --output .temp/TASK-ID/thermal-before.jsonl
+
+# Five-second samples for three minutes
+agents/skills/android-testing-tools/scripts/android-device-telemetry monitor \
+  --serial 535a1632 \
+  --interval-seconds 5 \
+  --duration-seconds 180 \
+  --output .temp/TASK-ID/thermal-monitor.jsonl
+```
+
+Each sample includes battery temperature, Android thermal status, named
+thermal zones, cooling-device levels, and CPU policy current/capped/hardware
+maximum frequencies. A capped maximum below the hardware maximum is direct
+throttling evidence even if Android reports thermal status zero. Output goes
+only to the caller-selected path. The launcher runs a typed Go implementation
+and requires Go 1.21 or newer.
 
 ### extract-screenshots
 
