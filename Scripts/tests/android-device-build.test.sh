@@ -31,6 +31,9 @@ if [[ "${1:-}" == "-s" ]]; then shift 2; fi
 sub="${1:-}"; shift || true
 mode="${FAKE_ADB_MODE:-ok}"
 case "$sub" in
+  get-state)
+    echo "device"
+    ;;
   devices)
     echo "List of devices attached"
     if [[ "$mode" == "multi" ]]; then

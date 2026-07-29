@@ -294,6 +294,11 @@ fi
 require_device "$DEVICE_A"
 require_device "$DEVICE_B"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KEEP_AWAKE_SCRIPT="$SCRIPT_DIR/../agents/skills/android-testing-tools/scripts/android-keep-awake.sh"
+"$KEEP_AWAKE_SCRIPT" --adb "$ADB" --serial "$DEVICE_A"
+"$KEEP_AWAKE_SCRIPT" --adb "$ADB" --serial "$DEVICE_B"
+
 mkdir -p "$STAGING"
 : >"$BRIDGE_LOG"
 

@@ -198,6 +198,10 @@ fi
 
 MODEL="$(adbx shell getprop ro.product.model 2>/dev/null | tr -d '\r' || true)"
 RELEASE="$(adbx shell getprop ro.build.version.release 2>/dev/null | tr -d '\r' || true)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KEEP_AWAKE_SCRIPT="$SCRIPT_DIR/../agents/skills/android-testing-tools/scripts/android-keep-awake.sh"
+"$KEEP_AWAKE_SCRIPT" --adb "$(command -v adb)" --serial "$SERIAL"
+
 echo "=== android-device-build ==="
 echo "Device : $SERIAL  ${MODEL:+($MODEL, Android $RELEASE)}"
 echo "Module : $MODULE   Variant: $VARIANT"

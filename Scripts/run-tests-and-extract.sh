@@ -167,6 +167,15 @@ run_connected_lane() {
 }
 
 run_manual_lane() {
+    local script_dir keep_awake_script
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    keep_awake_script="$script_dir/../agents/skills/android-testing-tools/scripts/android-keep-awake.sh"
+    if [[ -n "$SERIAL" ]]; then
+        "$keep_awake_script" --serial "$SERIAL"
+    else
+        "$keep_awake_script"
+    fi
+
     echo "Assembling app + androidTest APKs..."
     echo "> ./gradlew :${MODULE}:assembleDebug :${MODULE}:assembleAndroidTest"
     echo
