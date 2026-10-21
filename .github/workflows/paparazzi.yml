@@ -37,6 +37,9 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The action provisions cmdline-tools; request the maintained extra package only.
+          packages: platform-tools
 
       - name: Verify Paparazzi snapshots
         working-directory: demo-app
