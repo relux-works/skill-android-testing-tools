@@ -1,0 +1,10 @@
+{
+  "schema_version": 3,
+  "capabilities": {
+    "network": [
+      "docs.qameta.io",
+      "github.com",
+      "docs.gradle.org"
+    ]
+  }
+}

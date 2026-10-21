@@ -175,7 +175,7 @@ fun testLogin() {
 @Test
 @Issue("JIRA-123")
 @TmsLink("TC-456")
-@Link("Documentation", url = "https://docs.example.com/login")
+@Link("Documentation", url = "https://docs.testing.example/login")
 fun testLogin() {
     // ...
 }
